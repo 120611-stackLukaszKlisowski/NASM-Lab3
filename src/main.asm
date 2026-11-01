@@ -1,38 +1,38 @@
 global _start
 
 section .data
-    wynik db '0', 10       ; Cyfra i znak nowej linii.
+    array1 dq 3, 4, 1, 2, 5
+    array2 dq 1, 2, 3, 4, 5
+
+section .bss
+    result_array resq 5
 
 section .text
 _start:
-    ; Dodaj dwie liczby.
-    mov rax, 3
-    add rax, 4
+    mov rdi, array1
+    mov rsi, array2
+    mov rdx, result_array
+    mov rcx, 5
+    call add_arrays
 
-    ; Zamien wynik 0–9 na znak ASCII.
-    add al, '0'
-    mov [wynik], al
-
-    ; Wypisz wynik — wersja 64-bitowa.
-    mov rax, 1             ; Numer wywolania write.
-    mov rdi, 1             ; Standardowe wyjscie.
-    mov rsi, wynik         ; Adres tekstu.
-    mov rdx, 2             ; Cyfra i nowa linia.
+    mov rax, 60
+    mov rdi, 0
     syscall
 
-    ; Odpowiednik dla interfejsu 32-bitowego:
-    ; mov eax, 4           ; Numer wywolania write.
-    ; mov ebx, 1           ; Standardowe wyjscie.
-    ; mov ecx, wynik       ; Adres tekstu — 32 bity.
-    ; mov edx, 2           ; Cyfra i nowa linia.
-    ; int 0x80
+add_arrays:
+    test rcx, rcx
+    jz .done
 
-    ; Zakoncz program — wersja 64-bitowa.
-    mov rax, 60            ; Numer wywolania exit.
-    mov rdi, 0             ; Kod zakonczenia — sukces.
-    syscall
+.loop_start:
+    mov rax, [rdi]
+    add rax, [rsi]
+    mov [rdx], rax
 
-    ; Odpowiednik dla interfejsu 32-bitowego:
-    ; mov eax, 1           ; Numer wywolania exit.
-    ; mov ebx, 0           ; Kod zakonczenia — sukces.
-    ; int 0x80
+    add rdi, 8
+    add rsi, 8
+    add rdx, 8
+
+    loop .loop_start
+
+.done:
+    ret
